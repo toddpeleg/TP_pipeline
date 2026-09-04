@@ -36,7 +36,7 @@ PROJECT_MENU_NAME = "projectContextMenu"
 
 # Bump this with every update so it's easy to confirm (right in the menu
 # itself) which version of the script is actually running.
-TP_PIPE_VERSION = "v2.32.0"
+TP_PIPE_VERSION = "v2.35.3"
 
 # Files this menu installs, and which Maya folder each one goes in.
 # "plugins" -> user prefs plug-ins directory
@@ -74,6 +74,15 @@ END_FRAME_OPTVAR = "endFrame"  # scene timeline end, paired with START_FRAME_OPT
 # slider instead.
 RENDER_FRAME_START_OPTVAR = "renderFrameStart"
 RENDER_FRAME_END_OPTVAR = "renderFrameEnd"
+
+# Project Sync (2.32.0, renamed from "Check Integrity" 2.35.0):
+# <project>/io/manifest.json records every asset (type, name) and shot
+# (name) this tool has ever created for that project. Todd's real use
+# case: he works out of at least two different project locations, so this
+# manifest is what lets Project Sync compare one location's history/disk
+# against another's and keep them in sync -- as well as catching a folder
+# that got deleted by accident in just one of them.
+PROJECT_SYNC_MANIFEST_FILENAME = "manifest.json"
 
 # ------------------------------------------------------------------
 # Studio folder template (from the reference project structure).
@@ -244,12 +253,6 @@ def build_menu():
     cmds.menuItem(label="Export Pipeline", command=lambda *a: show_export_pipeline_panel(), parent=menu)
     cmds.menuItem(label="Import Pipeline", command=lambda *a: show_import_pipeline_package(), parent=menu)
 
-    # 2.24.21: Todd — "the name is confusing as i didnt even recall what
-    # it did.. so lets change it to 'ingest'". Label/window text only —
-    # function/window names left as show_import_file_window/
-    # IMPORT_FILE_WINDOW internally to minimize the diff.
-    cmds.menuItem(label="Ingest", command=lambda *a: show_import_file_window(), parent=menu)
-
     cmds.menuItem(divider=True, dividerLabel="TP_pipe", parent=menu)
     cmds.menuItem(label="Install", command=lambda *a: install_setup_files(), parent=menu)
     cmds.menuItem(label="Update", command=lambda *a: update_pipeline(), parent=menu)
@@ -291,6 +294,13 @@ def build_menu():
         cmds.menuItem(
             label="Change Projects Location...", command=lambda *a: select_project_root(), parent=switch_project_menu
         )
+        cmds.menuItem(
+            # 2.34.0: moved here from Data Manager. 2.35.0: renamed to
+            # "Project Sync" -- Todd works out of at least two project
+            # locations, and this compares/rebuilds/keeps them in sync
+            # (also catches a single folder deleted by accident in one).
+            label="Project Sync", command=lambda *a: show_project_sync_window(), parent=switch_project_menu
+        )
     else:
         # 2.31.2: Todd noticed that with a projects root configured but zero
         # project folders under it yet (or no root set at all), there was no
@@ -304,6 +314,12 @@ def build_menu():
         )
         cmds.menuItem(
             label="Set Project Location", command=lambda *a: select_project_root(), parent=project_context_menu
+        )
+        cmds.menuItem(
+            # 2.34.0: usable even with no current project set, since its
+            # source/destination picker can point at any project folder.
+            # 2.35.0: renamed to "Project Sync".
+            label="Project Sync", command=lambda *a: show_project_sync_window(), parent=project_context_menu
         )
 
     # ---------------- FILE ----------------
@@ -379,6 +395,15 @@ def build_menu():
     )
     cmds.menuItem(
         label="Clean Rig Asset", command=lambda *a: clean_rig_asset(), parent=project_context_menu
+    )
+    cmds.menuItem(
+        # 2.35.3: moved here from the top-level TP_pipe menu, at Todd's
+        # request -- sits under Asset Manager now, last on that list.
+        # 2.24.21: Todd — "the name is confusing as i didnt even recall
+        # what it did.. so lets change it to 'ingest'". Label/window text
+        # only — function/window names left as show_import_file_window/
+        # IMPORT_FILE_WINDOW internally to minimize the diff.
+        label="Ingest", command=lambda *a: show_import_file_window(), parent=project_context_menu
     )
 
     # ---------------- RENDER SETTINGS ----------------
@@ -1448,6 +1473,7 @@ def _create_shot_folders(prefix, scenes_dir, numbers):
     """
     created = []
     skipped = []
+    project_path = os.path.dirname(scenes_dir)  # scenes_dir is always <project>/shots
 
     for number in numbers:
         shot_name = format_shot_name(prefix, number)
@@ -1459,6 +1485,7 @@ def _create_shot_folders(prefix, scenes_dir, numbers):
             created.append(shot_name)
 
         build_shot_task_structure(shot_path)
+        _manifest_add_shot(project_path, shot_name)  # Project Sync (2.32.0, renamed 2.35.0)
 
     print(f"Created {len(created)} shot folder(s) in: {scenes_dir}")
     for name in created:
@@ -8008,6 +8035,460 @@ def _task_name_from_scene_path(scene_path):
     return os.path.basename(task_dir) or None
 
 
+# ------------------------------------------------------------------
+# Project Sync — tracked-name manifest (2.32.0, renamed from "Check
+# Integrity" 2.35.0)
+# ------------------------------------------------------------------
+
+def _project_manifest_path(project_path):
+    """<project>/io/manifest.json — a standard, predictable path so Todd's
+    two (or more) copies of a project each carry their own comparable
+    manifest, right alongside Pipeline Package's <project>/io/data xfer/."""
+    return os.path.join(project_path, "io", PROJECT_SYNC_MANIFEST_FILENAME)
+
+
+def _load_manifest(project_path):
+    """
+    Return {"assets": [[type, name], ...], "shots": [name, ...]}. Missing or
+    unreadable/corrupt manifest file is treated as empty rather than raising
+    -- this is best-effort bookkeeping, never something that should block
+    the asset/shot creation it's attached to.
+    """
+    path = _project_manifest_path(project_path)
+    if not os.path.isfile(path):
+        return {"assets": [], "shots": []}
+    try:
+        with open(path, "r") as f:
+            data = json.load(f)
+        return {
+            "assets": [list(pair) for pair in data.get("assets", [])],
+            "shots": list(data.get("shots", [])),
+        }
+    except Exception as e:
+        cmds.warning(f"Could not read Project Sync manifest ({e}) -- treating as empty.")
+        return {"assets": [], "shots": []}
+
+
+def _save_manifest(project_path, manifest):
+    path = _project_manifest_path(project_path)
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as f:
+            json.dump(manifest, f, indent=2)
+    except Exception as e:
+        cmds.warning(f"Could not save Project Sync manifest: {e}")
+
+
+def _manifest_add_asset(project_path, asset_type, asset_name):
+    """Record (asset_type, asset_name) as a known asset, if not already tracked."""
+    manifest = _load_manifest(project_path)
+    pair = [asset_type, asset_name]
+    if pair not in manifest["assets"]:
+        manifest["assets"].append(pair)
+        _save_manifest(project_path, manifest)
+
+
+def _manifest_add_shot(project_path, shot_name):
+    """Record shot_name as a known shot, if not already tracked."""
+    manifest = _load_manifest(project_path)
+    if shot_name not in manifest["shots"]:
+        manifest["shots"].append(shot_name)
+        _save_manifest(project_path, manifest)
+
+
+def _scan_disk_assets_and_shots(project_path):
+    """Every (type, name) asset pair and shot name that currently exists on disk under project_path."""
+    disk_assets = set()
+    for type_name in list_asset_category_types(project_path):
+        for asset_name, _asset_path in list_all_assets(project_path, type_name=type_name):
+            disk_assets.add((type_name, asset_name))
+    disk_shots = set(list_existing_shots(project_path))
+    return disk_assets, disk_shots
+
+
+def _full_resync_manifest(project_path):
+    """
+    "Update and Export Manifest" (2.35.0): ignores whatever was previously
+    tracked and rewrites project_path's manifest.json from a fresh,
+    complete scan of every asset/shot folder that exists on disk right
+    now. Returns (asset_count, shot_count).
+    """
+    disk_assets, disk_shots = _scan_disk_assets_and_shots(project_path)
+    manifest = {
+        "assets": sorted(list(pair) for pair in disk_assets),
+        "shots": sorted(disk_shots),
+    }
+    _save_manifest(project_path, manifest)
+    return len(disk_assets), len(disk_shots)
+
+
+def _project_sync_diff(manifest_project_path, disk_project_path):
+    """
+    Compare a manifest (read from manifest_project_path) against what's
+    actually on disk under disk_project_path right now. Same project for
+    both is the simple case (a project's own history vs. its own disk);
+    they commonly differ for Todd, who works out of at least two project
+    locations -- e.g. reading one location's manifest to sync the other.
+
+    Returns (missing_assets, untracked_assets, missing_shots, untracked_shots)
+    -- missing_assets/untracked_assets are sorted (type, name) tuples,
+    missing_shots/untracked_shots are sorted shot-name strings.
+
+    "Missing" = tracked, not found on disk_project_path now (candidate to
+    rebuild the empty folder skeleton for, into disk_project_path).
+    "Untracked" = found on disk_project_path, not in the manifest read
+    (covers assets/shots created before this feature shipped, made by hand
+    outside the tool, or simply absent from a different source manifest).
+    """
+    manifest = _load_manifest(manifest_project_path)
+    manifest_assets = {tuple(pair) for pair in manifest["assets"]}
+    manifest_shots = set(manifest["shots"])
+
+    disk_assets, disk_shots = _scan_disk_assets_and_shots(disk_project_path)
+    # Also sweep in every type ever tracked in the manifest read, even if it
+    # no longer exists on disk at all (e.g. all of "char" gone), so a fully-
+    # deleted type folder is still checked instead of silently dropping out.
+    manifest_only_types = {t for t, _ in manifest_assets} - {t for t, _ in disk_assets}
+    for type_name in manifest_only_types:
+        for asset_name, _asset_path in list_all_assets(disk_project_path, type_name=type_name):
+            disk_assets.add((type_name, asset_name))
+
+    missing_assets = sorted(manifest_assets - disk_assets)
+    untracked_assets = sorted(disk_assets - manifest_assets)
+    missing_shots = sorted(manifest_shots - disk_shots)
+    untracked_shots = sorted(disk_shots - manifest_shots)
+
+    return missing_assets, untracked_assets, missing_shots, untracked_shots
+
+
+PROJECT_SYNC_SOURCE_WINDOW = "projectSyncSourceWindow"
+PROJECT_SYNC_WINDOW = "projectSyncWindow"
+
+
+def show_project_sync_window(*_args):
+    """
+    "Project Sync" — top "Project" menu (moved 2.34.0 from Data Manager;
+    renamed from "Check Integrity" 2.35.0). Todd works out of at least two
+    different project locations, so this tool's job is keeping them in
+    sync -- as well as catching a folder that got deleted by accident in
+    just one of them. First step: a small popup with three choices, all
+    defaulting to the simplest case (this project's own manifest, synced
+    against this project's own disk):
+
+      - Source: "Current Project" (whatever's set as current in Maya right
+        now -- 2.35.3: renamed from "Manifest", and now genuinely resolves
+        to Maya's current project independently of Destination, matching
+        Destination's own "Current Project" option exactly, instead of the
+        old behavior of silently reusing whatever Destination resolved to)
+        or "Other Project" (browse to a different project folder and read
+        ITS manifest.json instead -- e.g. Todd's other working location,
+        or a backup copy).
+      - Destination: "Current Project" or "Other Project" (browse to a
+        different project folder) -- 2.35.3: renamed from "Check / Rebuild
+        Into".
+      - "Update and Export Manifest" checkbox: a standalone action,
+        independent of the above -- when checked, Source is disabled
+        (there's nothing to diff, this isn't a comparison), the button
+        below relabels to "Apply" (2.35.3), and hitting it does a full
+        fresh disk scan of the Destination project and overwrites ITS
+        <project>/io/manifest.json completely, ignoring whatever was
+        tracked before. No checklist screen follows; just a confirmation
+        of what was written and where.
+
+    When the checkbox is unchecked, the button stays "Continue" and
+    resolves both paths, handing off to _show_project_sync_diff_window.
+    Untracked items there always get added to the DESTINATION project's
+    own manifest (never the source's, when they differ) -- that's the
+    project actually being maintained.
+    """
+    if cmds.window(PROJECT_SYNC_SOURCE_WINDOW, exists=True):
+        cmds.deleteUI(PROJECT_SYNC_SOURCE_WINDOW)
+
+    window = cmds.window(PROJECT_SYNC_SOURCE_WINDOW, title="Project Sync", sizeable=False, width=380)
+    cmds.columnLayout(adjustableColumn=True, columnAlign="left", rowSpacing=6, columnOffset=("both", 12))
+
+    cmds.text(label="")  # top spacer
+    cmds.text(label="Project Sync", font="boldLabelFont", align="left")
+    cmds.separator(height=10, style="in")
+
+    cmds.text(label="Source", font="boldLabelFont", align="left")
+    source_radio = cmds.radioButtonGrp(
+        labelArray2=("Current Project", "Other Project"), numberOfRadioButtons=2, select=1, columnWidth2=(120, 120)
+    )
+
+    source_row = cmds.rowLayout(numberOfColumns=2, columnWidth2=(240, 90), adjustableColumn=1, enable=False)
+    source_path_field = cmds.textField(text="", editable=False)
+
+    def on_browse_source(*_args):
+        result = cmds.fileDialog2(fileMode=3, caption="Select Project to Read Manifest From")
+        if result:
+            cmds.textField(source_path_field, edit=True, text=result[0])
+
+    cmds.button(label="Browse...", command=on_browse_source)
+    cmds.setParent("..")
+
+    def on_source_changed(*_args):
+        cmds.rowLayout(source_row, edit=True, enable=(cmds.radioButtonGrp(source_radio, query=True, select=True) == 2))
+
+    cmds.radioButtonGrp(source_radio, edit=True, changeCommand=on_source_changed)
+
+    cmds.separator(height=10, style="in")
+
+    cmds.text(label="Destination", font="boldLabelFont", align="left")
+    destination_radio = cmds.radioButtonGrp(
+        labelArray2=("Current Project", "Other Project"), numberOfRadioButtons=2, select=1, columnWidth2=(120, 120)
+    )
+
+    destination_row = cmds.rowLayout(numberOfColumns=2, columnWidth2=(240, 90), adjustableColumn=1, enable=False)
+    destination_path_field = cmds.textField(text="", editable=False)
+
+    def on_browse_destination(*_args):
+        result = cmds.fileDialog2(fileMode=3, caption="Select Project to Check / Rebuild")
+        if result:
+            cmds.textField(destination_path_field, edit=True, text=result[0])
+
+    cmds.button(label="Browse...", command=on_browse_destination)
+    cmds.setParent("..")
+
+    def on_destination_changed(*_args):
+        cmds.rowLayout(
+            destination_row, edit=True, enable=(cmds.radioButtonGrp(destination_radio, query=True, select=True) == 2)
+        )
+
+    cmds.radioButtonGrp(destination_radio, edit=True, changeCommand=on_destination_changed)
+
+    cmds.separator(height=10, style="in")
+
+    export_checkbox = cmds.checkBox(label="Update and Export Manifest", value=False)
+
+    def on_export_changed(*_args):
+        do_export = cmds.checkBox(export_checkbox, query=True, value=True)
+        # Standalone action -- Source doesn't apply while it's on.
+        cmds.radioButtonGrp(source_radio, edit=True, enable=not do_export)
+        cmds.rowLayout(
+            source_row,
+            edit=True,
+            enable=(not do_export) and (cmds.radioButtonGrp(source_radio, query=True, select=True) == 2),
+        )
+        cmds.button(continue_button, edit=True, label=("Apply" if do_export else "Continue"))
+
+    cmds.checkBox(export_checkbox, edit=True, changeCommand=on_export_changed)
+
+    cmds.separator(height=10, style="in")
+
+    def on_continue(*_args):
+        if cmds.radioButtonGrp(destination_radio, query=True, select=True) == 2:
+            disk_project_path = cmds.textField(destination_path_field, query=True, text=True).strip()
+            if not disk_project_path or not os.path.isdir(disk_project_path):
+                cmds.warning("Choose a valid project folder for Destination first.")
+                return
+        else:
+            disk_project_path = get_current_project()
+            if not disk_project_path:
+                return
+
+        if cmds.checkBox(export_checkbox, query=True, value=True):
+            cmds.deleteUI(window)
+            asset_count, shot_count = _full_resync_manifest(disk_project_path)
+            manifest_path = _project_manifest_path(disk_project_path)
+            print(
+                f"Project Sync: manifest updated -- {asset_count} asset(s), {shot_count} shot(s). "
+                f"Saved to: {manifest_path}"
+            )
+            cmds.confirmDialog(
+                title="Manifest Updated",
+                message=(
+                    f"Manifest updated: {asset_count} asset(s), {shot_count} shot(s).\n\n"
+                    f"Saved to:\n{manifest_path}"
+                ),
+                button=["OK"],
+            )
+            return
+
+        if cmds.radioButtonGrp(source_radio, query=True, select=True) == 2:
+            manifest_project_path = cmds.textField(source_path_field, query=True, text=True).strip()
+            if not manifest_project_path or not os.path.isdir(manifest_project_path):
+                cmds.warning("Choose a valid project folder for Source first.")
+                return
+        else:
+            manifest_project_path = get_current_project()
+            if not manifest_project_path:
+                return
+
+        cmds.deleteUI(window)
+        _show_project_sync_diff_window(manifest_project_path, disk_project_path)
+
+    cmds.columnLayout(adjustableColumn=True, columnAlign="center")
+    cmds.rowLayout(numberOfColumns=2, columnAttach2=("both", "both"), columnOffset2=(0, 8))
+    continue_button = cmds.button(label="Continue", width=150, command=on_continue)
+    cmds.button(label="Cancel", width=150, command=lambda *a: cmds.deleteUI(window))
+    cmds.setParent("..")
+    cmds.setParent("..")
+
+    cmds.text(label="")  # bottom spacer
+
+    cmds.showWindow(window)
+
+
+def _show_project_sync_diff_window(manifest_project_path, disk_project_path):
+    """
+    Compares every asset/shot recorded in manifest_project_path's manifest
+    (written to by Create Asset Folders and Create Shot Folders) against
+    what actually exists on disk_project_path's disk right now, and lets
+    Todd choose which gaps to close:
+
+      - Missing: tracked, gone now (e.g. an asset folder deleted by
+        accident outside the tool, or simply not yet created in this
+        location) -- Apply rebuilds an EMPTY folder skeleton for each
+        checked one, in disk_project_path, the same structure Create
+        Asset Folders / Create Shot Folders would build for a brand-new
+        name. This restores folder STRUCTURE only -- any scene files,
+        caches, or renders that were inside are not recovered; that's
+        outside what a folder-structure tool can do.
+      - Untracked: exists on disk_project_path, not in the manifest read --
+        covers assets/shots created before this feature shipped, made by
+        hand outside the tool, or simply absent from a different source
+        manifest. Apply adds them to disk_project_path's OWN manifest (not
+        manifest_project_path's, when they differ) -- no folder changes.
+
+    If nothing is out of sync, skips the checklist and just confirms that.
+    """
+    missing_assets, untracked_assets, missing_shots, untracked_shots = _project_sync_diff(
+        manifest_project_path, disk_project_path
+    )
+
+    if not (missing_assets or untracked_assets or missing_shots or untracked_shots):
+        cmds.confirmDialog(
+            title="Project Sync",
+            message="Everything matches -- no missing or untracked assets/shots found.",
+            button=["OK"],
+        )
+        return
+
+    if cmds.window(PROJECT_SYNC_WINDOW, exists=True):
+        cmds.deleteUI(PROJECT_SYNC_WINDOW)
+
+    window = cmds.window(PROJECT_SYNC_WINDOW, title="Project Sync", sizeable=False, width=340)
+    cmds.columnLayout(adjustableColumn=True, columnAlign="left", rowSpacing=6, columnOffset=("both", 12))
+
+    cmds.text(label="")  # top spacer
+    cmds.text(label="Project Sync", font="boldLabelFont", align="left")
+    cmds.text(label=f"Project: {disk_project_path}", align="left")
+    same_project = (manifest_project_path == disk_project_path)
+    if not same_project:
+        cmds.text(label=f"Comparing against manifest from: {manifest_project_path}", align="left")
+    cmds.separator(height=10, style="in")
+
+    missing_asset_checks = {}
+    missing_shot_checks = {}
+    untracked_asset_checks = {}
+    untracked_shot_checks = {}
+
+    # 2.35.2: when Source and Destination are different projects, name both
+    # explicitly in the section headers -- "on disk"/"in the manifest" are
+    # ambiguous the moment two different projects are involved. Short names
+    # (folder basenames) keep the header from ballooning, since the two
+    # full paths are already spelled out above.
+    if same_project:
+        missing_header = "Missing -- recorded in the manifest, but not found on disk"
+        untracked_header = "Untracked -- found on disk, but not recorded in the manifest"
+    else:
+        disk_label = os.path.basename(disk_project_path.rstrip(os.sep))
+        manifest_label = os.path.basename(manifest_project_path.rstrip(os.sep))
+        missing_header = (
+            f'Missing -- recorded in the manifest from "{manifest_label}", '
+            f'but not found on disk in "{disk_label}"'
+        )
+        untracked_header = (
+            f'Untracked -- found on disk in "{disk_label}", '
+            f'but not recorded in the manifest from "{manifest_label}"'
+        )
+
+    if missing_assets or missing_shots:
+        cmds.text(label=missing_header, font="boldLabelFont", align="left", wordWrap=True, width=310)
+        for asset_type, asset_name in missing_assets:
+            missing_asset_checks[(asset_type, asset_name)] = cmds.checkBox(
+                label=f"{asset_type}/{asset_name}", value=True
+            )
+        for shot_name in missing_shots:
+            missing_shot_checks[shot_name] = cmds.checkBox(label=shot_name, value=True)
+        cmds.separator(height=10, style="in")
+
+    if untracked_assets or untracked_shots:
+        cmds.text(label=untracked_header, font="boldLabelFont", align="left", wordWrap=True, width=310)
+        for asset_type, asset_name in untracked_assets:
+            untracked_asset_checks[(asset_type, asset_name)] = cmds.checkBox(
+                label=f"{asset_type}/{asset_name}", value=True
+            )
+        for shot_name in untracked_shots:
+            untracked_shot_checks[shot_name] = cmds.checkBox(label=shot_name, value=True)
+        cmds.separator(height=10, style="in")
+
+    def on_apply(*_args):
+        rebuilt_assets = []
+        for (asset_type, asset_name), cb in missing_asset_checks.items():
+            if cmds.checkBox(cb, query=True, value=True):
+                asset_dir = os.path.join(disk_project_path, "assets", asset_type, asset_name)
+                build_asset_task_structure(asset_dir)
+                rebuilt_assets.append(f"{asset_type}/{asset_name}")
+
+        rebuilt_shots = []
+        scenes_dir = get_scenes_directory(disk_project_path)
+        for shot_name, cb in missing_shot_checks.items():
+            if cmds.checkBox(cb, query=True, value=True):
+                shot_path = os.path.join(scenes_dir, shot_name)
+                os.makedirs(shot_path, exist_ok=True)
+                build_shot_task_structure(shot_path)
+                rebuilt_shots.append(shot_name)
+
+        tracked_assets = []
+        for (asset_type, asset_name), cb in untracked_asset_checks.items():
+            if cmds.checkBox(cb, query=True, value=True):
+                _manifest_add_asset(disk_project_path, asset_type, asset_name)
+                tracked_assets.append(f"{asset_type}/{asset_name}")
+
+        tracked_shots = []
+        for shot_name, cb in untracked_shot_checks.items():
+            if cmds.checkBox(cb, query=True, value=True):
+                _manifest_add_shot(disk_project_path, shot_name)
+                tracked_shots.append(shot_name)
+
+        cmds.deleteUI(window)
+
+        print("Project Sync applied:")
+        if rebuilt_assets:
+            print(f"  Rebuilt asset folders: {rebuilt_assets}")
+        if rebuilt_shots:
+            print(f"  Rebuilt shot folders: {rebuilt_shots}")
+        if tracked_assets:
+            print(f"  Newly tracked assets: {tracked_assets}")
+        if tracked_shots:
+            print(f"  Newly tracked shots: {tracked_shots}")
+
+        cmds.confirmDialog(
+            title="Project Sync Applied",
+            message=(
+                f"Rebuilt: {len(rebuilt_assets) + len(rebuilt_shots)}\n"
+                f"Newly tracked: {len(tracked_assets) + len(tracked_shots)}\n\n"
+                "Rebuilt folders are empty skeletons only -- any scene files/caches\n"
+                "that were inside are not recovered.\n\n"
+                "See Script Editor output for details."
+            ),
+            button=["OK"],
+        )
+
+    cmds.columnLayout(adjustableColumn=True, columnAlign="center")
+    cmds.rowLayout(numberOfColumns=2, columnAttach2=("both", "both"), columnOffset2=(0, 8))
+    cmds.button(label="Apply", width=150, command=on_apply)
+    cmds.button(label="Cancel", width=150, command=lambda *a: cmds.deleteUI(window))
+    cmds.setParent("..")
+    cmds.setParent("..")
+
+    cmds.text(label="")  # bottom spacer
+
+    cmds.showWindow(window)
+
+
 def create_asset_folder_structure(*_args):
     """
     "Create Asset Folders" — Data Manager menu item (renamed/moved from
@@ -8036,6 +8517,7 @@ def create_asset_folder_structure(*_args):
     asset_dir = os.path.join(project_path, "assets", asset_type, asset_name)
     already_existed = os.path.isdir(asset_dir)
     build_asset_task_structure(asset_dir)
+    _manifest_add_asset(project_path, asset_type, asset_name)  # Project Sync (2.32.0, renamed 2.35.0)
 
     if already_existed:
         print(f"Create Asset Folders: '{asset_name}' already existed, filled in any missing task folders.")
