@@ -36,7 +36,7 @@ PROJECT_MENU_NAME = "projectContextMenu"
 
 # Bump this with every update so it's easy to confirm (right in the menu
 # itself) which version of the script is actually running.
-TP_PIPE_VERSION = "v2.35.3"
+TP_PIPE_VERSION = "v2.35.5"
 
 # Files this menu installs, and which Maya folder each one goes in.
 # "plugins" -> user prefs plug-ins directory
@@ -131,7 +131,10 @@ SHOT_TASK_STRUCTURE = {
     },
     "previs": {
         "work": {"maya": {}},
-        "output": {"render": {}},
+        # 2.35.4: previs gained an output/cache folder alongside anim/fx --
+        # see get_shot_cache_dir/SHOT_CACHE_TASKS below, Export Cache now
+        # works from a previs-saved scene too, not just anim.
+        "output": {"render": {}, "cache": {}},
     },
 }
 
@@ -268,13 +271,26 @@ def build_menu():
     projects_root = get_projects_root()
     available_projects = scan_projects_root(projects_root) if projects_root else []
 
+    # 2.35.5: Todd -- "when first installing and running the pipeline
+    # tool, the initial form of the project submenu is limited and
+    # different and i'd like to have that fixed." Previously the
+    # zero-projects case (no projects root set yet, or a root with zero
+    # project folders under it -- the 2.31.2/2.31.3 fix below) got a
+    # completely different flat layout bolted straight onto
+    # project_context_menu instead of this "Project" submenu: different
+    # item labels ("Set Project Location" vs. "Change Projects
+    # Location..."), no Rename Project at all, and no submenu wrapper.
+    # Now it's the exact same "Project" submenu, same item labels/order,
+    # in both cases -- only the radio-button project list is conditional
+    # (nothing to list yet), and Rename Project is present but disabled
+    # (nothing to rename yet) instead of omitted outright.
+    current_project_path = get_current_project(warn_if_missing=False) if available_projects else None
+    # Renamed from "Switch Project" to just "Project" — same rollout,
+    # same radio-button project list (Todd likes both as-is) — but now
+    # also carries the rest of the project-level actions that used to
+    # live in their own separate "Project" submenu under Data Manager.
+    switch_project_menu = cmds.menuItem(label="Project", subMenu=True, parent=project_context_menu)
     if available_projects:
-        current_project_path = get_current_project(warn_if_missing=False)
-        # Renamed from "Switch Project" to just "Project" — same rollout,
-        # same radio-button project list (Todd likes both as-is) — but now
-        # also carries the rest of the project-level actions that used to
-        # live in their own separate "Project" submenu under Data Manager.
-        switch_project_menu = cmds.menuItem(label="Project", subMenu=True, parent=project_context_menu)
         radio_collection = cmds.radioMenuItemCollection(parent=switch_project_menu)
         for candidate_path in available_projects:
             candidate_name = os.path.basename(candidate_path.rstrip(os.sep))
@@ -285,42 +301,32 @@ def build_menu():
                 parent=switch_project_menu,
             )
         cmds.menuItem(divider=True, parent=switch_project_menu)
-        cmds.menuItem(
-            label="Create New Project", command=lambda *a: show_create_project_window(), parent=switch_project_menu
-        )
-        cmds.menuItem(
-            label="Rename Project", command=lambda *a: show_rename_project_window(), parent=switch_project_menu
-        )
-        cmds.menuItem(
-            label="Change Projects Location...", command=lambda *a: select_project_root(), parent=switch_project_menu
-        )
-        cmds.menuItem(
-            # 2.34.0: moved here from Data Manager. 2.35.0: renamed to
-            # "Project Sync" -- Todd works out of at least two project
-            # locations, and this compares/rebuilds/keeps them in sync
-            # (also catches a single folder deleted by accident in one).
-            label="Project Sync", command=lambda *a: show_project_sync_window(), parent=switch_project_menu
-        )
-    else:
-        # 2.31.2: Todd noticed that with a projects root configured but zero
-        # project folders under it yet (or no root set at all), there was no
-        # way to create the first project from this menu -- only re-picking
-        # the master location. Added here so Create New Project is always
-        # reachable, not gated behind at least one project already existing.
-        # 2.31.3: Todd -- put Create New Project first, and renamed the other
-        # item from "Set Master Projects Location" to "Set Project Location".
-        cmds.menuItem(
-            label="Create New Project", command=lambda *a: show_create_project_window(), parent=project_context_menu
-        )
-        cmds.menuItem(
-            label="Set Project Location", command=lambda *a: select_project_root(), parent=project_context_menu
-        )
-        cmds.menuItem(
-            # 2.34.0: usable even with no current project set, since its
-            # source/destination picker can point at any project folder.
-            # 2.35.0: renamed to "Project Sync".
-            label="Project Sync", command=lambda *a: show_project_sync_window(), parent=project_context_menu
-        )
+    cmds.menuItem(
+        label="Create New Project", command=lambda *a: show_create_project_window(), parent=switch_project_menu
+    )
+    cmds.menuItem(
+        label="Rename Project",
+        command=lambda *a: show_rename_project_window(),
+        parent=switch_project_menu,
+        # 2.35.5: nothing to rename yet in the zero-projects case -- shown
+        # (not omitted) so the item order/labels never shift depending on
+        # project count, just grayed out until a project exists.
+        enable=bool(available_projects),
+    )
+    cmds.menuItem(
+        label="Change Projects Location...", command=lambda *a: select_project_root(), parent=switch_project_menu
+    )
+    cmds.menuItem(
+        # 2.34.0: moved here from Data Manager. 2.35.0: renamed to
+        # "Project Sync" -- Todd works out of at least two project
+        # locations, and this compares/rebuilds/keeps them in sync
+        # (also catches a single folder deleted by accident in one).
+        # 2.35.5: usable even with no current project set, since its
+        # source/destination picker can point at any project folder --
+        # this is why it's fine for this item to no longer be
+        # conditional on available_projects either.
+        label="Project Sync", command=lambda *a: show_project_sync_window(), parent=switch_project_menu
+    )
 
     # ---------------- FILE ----------------
     cmds.menuItem(divider=True, dividerLabel="File", parent=project_context_menu)
@@ -3799,9 +3805,62 @@ ASSET_MANAGER_CACHE_LABEL = "Cache"
 CACHE_VERSIONED_FILE_PATTERN = re.compile(r"^(.+)\.v(\d+)\.(abc)$", re.IGNORECASE)
 
 
-def get_shot_cache_dir(project_path, shot_name):
-    """Path to a shot's anim cache output folder: shots/<shot>/anim/output/cache."""
-    return os.path.join(project_path, "shots", shot_name, "anim", "output", "cache")
+# 2.35.4: Export Cache/Asset Manager caches used to only ever live under a
+# shot's anim task (shots/<shot>/anim/output/cache) -- Todd: "export cache
+# doesnt work with previs scenes and it should.. likewise.. the asset
+# manager should recognize publishes and caches in the previs task."
+# Caches can now also be exported from a previs-saved scene, into their
+# own shots/<shot>/previs/output/cache folder (kept separate from anim's,
+# not merged together) -- SHOT_CACHE_TASKS is every shot task that can
+# hold a cache folder this way. The stub naming convention already bakes
+# the task name in (get_next_cache_version's "<asset>_<task>.vNNN.abc",
+# e.g. "georgeMichael_previs.v001.abc" vs "georgeMichael_anim.v001.abc"),
+# so a cache's own name tells you which task's folder it lives in --
+# _shot_cache_task_from_cache_name recovers that, letting every existing
+# get_shot_cache_names/get_shot_cache_versions call site keep working
+# unchanged (they no longer assume "anim" internally) while only the
+# handful of call sites that need to pick a WRITE location (Export Cache)
+# or already know a specific cache_name pass a task explicitly.
+SHOT_CACHE_TASKS = ("anim", "previs")
+DEFAULT_SHOT_CACHE_TASK = "anim"
+
+
+def _shot_cache_task_from_cache_name(cache_name):
+    """
+    Cache name stubs are "<asset>_<task>" (e.g. "georgeMichael_previs",
+    "camera_anim" -- see export_selection_to_cache). Recover which shot
+    task's cache folder a given stub's files live in. Falls back to anim
+    for anything that doesn't end in a recognized task suffix -- covers
+    every cache exported before previs support existed, which all end in
+    "_anim" by construction.
+    """
+    lowered = (cache_name or "").lower()
+    for task_name in SHOT_CACHE_TASKS:
+        if lowered.endswith(f"_{task_name}"):
+            return task_name
+    return DEFAULT_SHOT_CACHE_TASK
+
+
+def _strip_shot_cache_task_suffix(cache_name):
+    """
+    Best-effort ASSET name for a cache name stub, used to auto-match a
+    same-named published Shade asset (Add Asset's Cache type, Import
+    Caches) -- strips whichever SHOT_CACHE_TASKS suffix the stub ends
+    with ("georgeMichael_previs" -> "georgeMichael", same idea as
+    "georgeMichael_anim" -> "georgeMichael"). Falls back to the cache
+    name unchanged if it doesn't end in a recognized suffix.
+    """
+    lowered = (cache_name or "").lower()
+    for task_name in SHOT_CACHE_TASKS:
+        suffix = f"_{task_name}"
+        if lowered.endswith(suffix):
+            return cache_name[: -len(suffix)]
+    return cache_name
+
+
+def get_shot_cache_dir(project_path, shot_name, task_name=DEFAULT_SHOT_CACHE_TASK):
+    """Path to a shot task's cache output folder: shots/<shot>/<task_name>/output/cache."""
+    return os.path.join(project_path, "shots", shot_name, task_name, "output", "cache")
 
 
 def get_next_cache_version(folder_path, filename_stub):
@@ -3818,27 +3877,33 @@ def get_next_cache_version(folder_path, filename_stub):
 
 def get_shot_cache_names(project_path, shot_name):
     """
-    Return the distinct cache name stubs found in a shot's anim cache
-    folder (e.g. ["camera_anim", "georgeMichael_anim", "hat_anim"],
-    sorted) — one per object that's ever been cached for this shot, since
-    Export Cache writes one independently-versioned file per top-level
-    selected object rather than one combined file per shot.
+    Return the distinct cache name stubs found across every shot task's
+    cache folder (SHOT_CACHE_TASKS -- anim and previs, e.g.
+    ["camera_anim", "georgeMichael_anim", "georgeMichael_previs",
+    "hat_anim"], sorted) — one per object that's ever been cached for
+    this shot from either task, since Export Cache writes one
+    independently-versioned file per top-level selected object rather
+    than one combined file per shot.
     """
-    cache_dir = get_shot_cache_dir(project_path, shot_name)
-    if not os.path.isdir(cache_dir):
-        return []
-
     stubs = set()
-    for name in os.listdir(cache_dir):
-        match = CACHE_VERSIONED_FILE_PATTERN.match(name)
-        if match:
-            stubs.add(match.group(1))
+    for task_name in SHOT_CACHE_TASKS:
+        cache_dir = get_shot_cache_dir(project_path, shot_name, task_name)
+        if not os.path.isdir(cache_dir):
+            continue
+        for name in os.listdir(cache_dir):
+            match = CACHE_VERSIONED_FILE_PATTERN.match(name)
+            if match:
+                stubs.add(match.group(1))
     return sorted(stubs)
 
 
 def get_shot_cache_versions(project_path, shot_name, cache_name):
-    """Return every versioned .abc filename for one cache name stub in a shot's anim cache folder, newest first."""
-    cache_dir = get_shot_cache_dir(project_path, shot_name)
+    """
+    Return every versioned .abc filename for one cache name stub, newest
+    first — looks in whichever shot task's cache folder that stub
+    actually belongs to (see _shot_cache_task_from_cache_name).
+    """
+    cache_dir = get_shot_cache_dir(project_path, shot_name, _shot_cache_task_from_cache_name(cache_name))
     if not os.path.isdir(cache_dir):
         return []
 
@@ -4431,8 +4496,9 @@ def _shade_asset_namespace_and_label(obj_node):
 def _parse_cache_file_path(project_path, cache_file_path):
     """
     Given a cache file's full path, return (shot_name, cache_name) parsed
-    back out of the standard shots/<shot>/anim/output/cache/<cache_name>.
-    vNNN.abc layout, or (None, None) if it doesn't match. Used to tag a
+    back out of the standard shots/<shot>/<task>/output/cache/<cache_name>.
+    vNNN.abc layout — <task> is any SHOT_CACHE_TASKS entry (anim or
+    previs, 2.35.4) — or (None, None) if it doesn't match. Used to tag a
     cache attachment from the Add Asset Cache picker, which only has the
     file path in hand (unlike Import Caches, which already knows the shot
     and cache name from its own dropdowns).
@@ -4443,7 +4509,7 @@ def _parse_cache_file_path(project_path, cache_file_path):
         return None, None  # different drive on Windows, can't make relative
 
     parts = rel.split("/")
-    if len(parts) >= 6 and parts[0] == "shots" and parts[2:5] == ["anim", "output", "cache"]:
+    if len(parts) >= 6 and parts[0] == "shots" and parts[2] in SHOT_CACHE_TASKS and parts[3:5] == ["output", "cache"]:
         shot_name = parts[1]
         match = CACHE_VERSIONED_FILE_PATTERN.match(parts[-1])
         cache_name = match.group(1) if match else None
@@ -4810,7 +4876,9 @@ def show_asset_manager_add_window(project_path, on_close=None):
     can be added from one window instead of a separate picker per type.
 
     Type also offers "Cache" (ASSET_MANAGER_CACHE_TASK) — not a real asset
-    task, it pulls from shots/<shot>/anim/output/cache instead. Picking
+    task, it pulls from a shot's cache output folder instead (anim or
+    previs, whichever the cache was exported from — see SHOT_CACHE_TASKS).
+    Picking
     Cache repurposes the row from Name/Ver/Mode to Shot/Cache Name/Ver:
     the 2nd dropdown lists shots, the 3rd (normally Mode, N/A for caches)
     is repurposed to list that shot's cache name stubs (one per object
@@ -5021,7 +5089,8 @@ def show_asset_manager_add_window(project_path, on_close=None):
             return
 
         if is_cache:
-            cache_file_path = os.path.join(get_shot_cache_dir(project_path, name_value), filename)
+            cache_dir = get_shot_cache_dir(project_path, name_value, _shot_cache_task_from_cache_name(cache_name_value))
+            cache_file_path = os.path.join(cache_dir, filename)
             show_cache_shade_picker_window(project_path, cache_file_path)
             return
 
@@ -5570,7 +5639,9 @@ def show_asset_manager_window():
                     errors.append(f"{row['asset_name']}: could not resolve cache version {chosen_label}")
                     continue
 
-                cache_dir = get_shot_cache_dir(project_path, row["cache_shot_name"])
+                cache_dir = get_shot_cache_dir(
+                    project_path, row["cache_shot_name"], _shot_cache_task_from_cache_name(row["cache_name"])
+                )
                 new_path = os.path.join(cache_dir, new_filename)
                 try:
                     # 2.31.12: use the resolved (possibly re-parented)
@@ -7129,7 +7200,7 @@ class AssetManagerPanel(MayaQWidgetDockableMixin, QtWidgets.QWidget):
         everything else in this panel.
         """
         shade_assets = list_assets_with_task(self.project_path, "lookdev")
-        guess = cache_name[:-5] if cache_name.lower().endswith("_anim") else cache_name
+        guess = _strip_shot_cache_task_suffix(cache_name)
         matched_asset = next((a for a in shade_assets if a.lower() == guess.lower()), None)
 
         attached = False
@@ -7300,7 +7371,9 @@ class AssetManagerPanel(MayaQWidgetDockableMixin, QtWidgets.QWidget):
                     # default-shader fallback) actually happens.
                     try:
                         filename = item["available_versions"][item["current_index"]]
-                        cache_dir = get_shot_cache_dir(self.project_path, item["cache_shot_name"])
+                        cache_dir = get_shot_cache_dir(
+                            self.project_path, item["cache_shot_name"], _shot_cache_task_from_cache_name(item["cache_name"])
+                        )
                         cache_file_path = os.path.join(cache_dir, filename)
                         self._commit_cache_add(cache_file_path, item["cache_name"], item["cache_shot_name"])
                         applied += 1
@@ -7311,7 +7384,9 @@ class AssetManagerPanel(MayaQWidgetDockableMixin, QtWidgets.QWidget):
                     continue  # no version change staged
                 try:
                     new_filename = item["available_versions"][item["current_index"]]
-                    cache_dir = get_shot_cache_dir(self.project_path, item["cache_shot_name"])
+                    cache_dir = get_shot_cache_dir(
+                        self.project_path, item["cache_shot_name"], _shot_cache_task_from_cache_name(item["cache_name"])
+                    )
                     # 2.31.12: use the resolved (possibly re-parented)
                     # node _attach_cache_to_node actually attached onto —
                     # see that function's 2.31.12 note. Traceback from
@@ -7784,7 +7859,7 @@ class ImportCachesPanel(MayaQWidgetDockableMixin, QtWidgets.QWidget):
             # Auto-match, same guess as everywhere else in this file:
             # strip a trailing "_anim" suffix, case-insensitive exact
             # match against a published Shade asset name.
-            guess = cache_name[:-5] if cache_name.lower().endswith("_anim") else cache_name
+            guess = _strip_shot_cache_task_suffix(cache_name)
             matched_asset = next((a for a in shade_assets if a.lower() == guess.lower()), None)
             row = _ImportCachesRow(cache_name, cache_versions, shade_assets, matched_asset, self.project_path)
             self.rows_layout.insertWidget(self.rows_layout.count() - 1, row)
@@ -7811,7 +7886,6 @@ class ImportCachesPanel(MayaQWidgetDockableMixin, QtWidgets.QWidget):
             cmds.warning("No caches to import.")
             return
 
-        cache_dir = get_shot_cache_dir(self.project_path, shot_name)
         succeeded = []
         skipped_unset = []
         failed = []
@@ -7830,6 +7904,12 @@ class ImportCachesPanel(MayaQWidgetDockableMixin, QtWidgets.QWidget):
                 skipped_unset.append(row.cache_name)
                 continue
 
+            # 2.35.4: each row's own cache_name says which shot task's
+            # cache folder its file actually lives in (anim vs previs) --
+            # no longer one shared cache_dir for the whole shot.
+            cache_dir = get_shot_cache_dir(
+                self.project_path, shot_name, _shot_cache_task_from_cache_name(row.cache_name)
+            )
             cache_file_path = os.path.join(cache_dir, cache_filename)
 
             if asset_name == IMPORT_CACHES_DEFAULT_SHADER_LABEL:
@@ -9565,30 +9645,37 @@ def publish_scene(*_args):
     )
 
 
-def _shot_anim_context_from_scene_path(scene_path):
+def _shot_cache_context_from_scene_path(scene_path):
     """
-    Given a scene path, return (shot_name, project_path) if it sits at the
-    standard shots/<shot>/anim/work/maya/<file> location (see
-    SHOT_TASK_MAYA_SUBPATH — anim is work/maya same as every other task),
-    else (None, None). Used by Export Cache to know which shot's
+    Given a scene path, return (shot_name, project_path, task_name) if it
+    sits at the standard shots/<shot>/<task>/work/maya/<file> location for
+    a cache-producing shot task (SHOT_CACHE_TASKS — anim or previs; see
+    SHOT_TASK_MAYA_SUBPATH — both are work/maya same as every other task),
+    else (None, None, None). Used by Export Cache to know which shot task's
     output/cache folder to write into, purely from where the scene is
     saved — same pattern as _task_name_from_scene_path/Setup Scene/Publish.
+
+    2.35.4: was _shot_anim_context_from_scene_path, hardcoded to the anim
+    task only — Todd: "export cache doesnt work with previs scenes and it
+    should." Generalized to any SHOT_CACHE_TASKS entry; the caller now
+    gets the actual task name back too so it can pick the right cache
+    folder (get_shot_cache_dir) and name the export after it.
     """
     task_name = _task_name_from_scene_path(scene_path)
-    if task_name != "anim":
-        return None, None
+    if task_name not in SHOT_CACHE_TASKS:
+        return None, None, None
 
-    # scene_path: .../shots/<shot>/anim/work/maya(/scenes)/<file>
+    # scene_path: .../shots/<shot>/<task_name>/work/maya(/scenes)/<file>
     maya_dir = _maya_folder_from_scene_path(scene_path)
     work_dir = os.path.dirname(maya_dir)
-    task_dir = os.path.dirname(work_dir)  # .../shots/<shot>/anim
+    task_dir = os.path.dirname(work_dir)  # .../shots/<shot>/<task_name>
     shot_dir = os.path.dirname(task_dir)  # .../shots/<shot>
     shots_dir = os.path.dirname(shot_dir)  # .../shots
     if os.path.basename(shots_dir) != "shots":
-        return None, None
+        return None, None, None
 
     project_path = os.path.dirname(shots_dir)
-    return os.path.basename(shot_dir), project_path
+    return os.path.basename(shot_dir), project_path, task_name
 
 
 EXPORT_CACHE_WINDOW = "exportCacheWindow"
@@ -9667,28 +9754,34 @@ def _resolve_export_cache_root(node):
 
 def export_selection_to_cache(*_args):
     """
-    "Export Cache" — context-aware Alembic export. Reads which shot the
-    current scene belongs to straight from where it's saved (must be a
-    shot's Anim task folder, work/maya) via _shot_anim_context_from_scene_path
-    — same "no picking, just read it from the save location" pattern as
-    Setup Scene / Publish — and always writes into that shot's
-    shots/<shot>/anim/output/cache/ folder (get_shot_cache_dir).
+    "Export Cache" — context-aware Alembic export. Reads which shot (and
+    which shot task — anim or previs, see SHOT_CACHE_TASKS) the current
+    scene belongs to straight from where it's saved (must be one of those
+    tasks' work/maya folder) via _shot_cache_context_from_scene_path — same
+    "no picking, just read it from the save location" pattern as Setup
+    Scene / Publish — and always writes into that shot task's own
+    output/cache/ folder (get_shot_cache_dir), e.g.
+    shots/<shot>/anim/output/cache/ or shots/<shot>/previs/output/cache/.
 
     Writes ONE independently-versioned .abc file PER TOP-LEVEL SELECTED
-    OBJECT — named after the ASSET, not the shot and not necessarily the
-    selected node itself (see _cache_name_for_selected_node) — e.g.
-    selecting georgeMichael's referenced "OBJ" group, camera, hat, and
-    car and exporting writes georgeMichael_anim.v001.abc,
-    camera_anim.v001.abc, hat_anim.v001.abc, and car_anim.v001.abc
-    (get_next_cache_version per object stub), so Asset Manager's Cache
-    type (which lists cache name stubs per shot via get_shot_cache_names)
-    can offer each object's cache independently. Per-object naming was
-    Todd's explicit ask (2.20.4) — this replaced the original 2.20.0
-    behavior of one combined <shot>_anim.vNNN.abc file for the whole
-    selection. Naming off the ASSET rather than the raw selected node
-    name was a follow-up fix (2.21.2) — selecting a referenced rig's
-    "OBJ" group used to produce "OBJ_anim.v001.abc" instead of
-    "georgeMichael_anim.v001.abc".
+    OBJECT — named after the ASSET plus the shot task it was exported
+    from, not the shot and not necessarily the selected node itself (see
+    _cache_name_for_selected_node) — e.g. selecting georgeMichael's
+    referenced "OBJ" group, camera, hat, and car from an Anim-task scene
+    and exporting writes georgeMichael_anim.v001.abc, camera_anim.v001.abc,
+    hat_anim.v001.abc, and car_anim.v001.abc (get_next_cache_version per
+    object stub); the same selection exported from a Previs-task scene
+    writes the "_previs" equivalents instead (2.35.4 — previously this
+    only ever worked from Anim, always suffixed "_anim"). Asset Manager's
+    Cache type (which lists cache name stubs per shot via
+    get_shot_cache_names, across every SHOT_CACHE_TASKS folder) offers
+    each object's cache independently regardless of which task produced
+    it. Per-object naming was Todd's explicit ask (2.20.4) — this replaced
+    the original 2.20.0 behavior of one combined <shot>_anim.vNNN.abc file
+    for the whole selection. Naming off the ASSET rather than the raw
+    selected node name was a follow-up fix (2.21.2) — selecting a
+    referenced rig's "OBJ" group used to produce "OBJ_anim.v001.abc"
+    instead of "georgeMichael_anim.v001.abc".
 
     This is a small custom frame-range option window rather than Maya's
     built-in Cache > Alembic Cache > Export Selection to Alembic... option
@@ -9723,15 +9816,15 @@ def export_selection_to_cache(*_args):
 
     scene_path = cmds.file(query=True, sceneName=True)
     if not scene_path:
-        cmds.warning("Save the scene into a shot's Anim task folder first.")
+        cmds.warning("Save the scene into a shot's Anim or Previs task folder first.")
         return
 
-    shot_name, project_path = _shot_anim_context_from_scene_path(scene_path)
+    shot_name, project_path, cache_task_name = _shot_cache_context_from_scene_path(scene_path)
     if not shot_name:
-        cmds.warning("Export Cache only works for scenes saved in a shot's Anim task folder.")
+        cmds.warning("Export Cache only works for scenes saved in a shot's Anim or Previs task folder.")
         return
 
-    cache_dir = get_shot_cache_dir(project_path, shot_name)
+    cache_dir = get_shot_cache_dir(project_path, shot_name, cache_task_name)
 
     # Precompute a filename per selected node up front (for the preview
     # list and the actual export). Two selected nodes can share a short
@@ -9742,7 +9835,7 @@ def export_selection_to_cache(*_args):
     stub_counts = {}
     export_items = []  # list of (node, stub, filename, file_path)
     for node in selection:
-        stub = f"{_cache_name_for_selected_node(node)}_anim"
+        stub = f"{_cache_name_for_selected_node(node)}_{cache_task_name}"
         base_version = get_next_cache_version(cache_dir, stub)
         version = base_version + stub_counts.get(stub, 0)
         stub_counts[stub] = stub_counts.get(stub, 0) + 1
@@ -9759,7 +9852,9 @@ def export_selection_to_cache(*_args):
     cmds.text(label="Export Cache to Alembic", font="boldLabelFont", align="left")
     cmds.separator(height=10, style="in")
 
-    cmds.text(label=f"Shot: {shot_name}", align="left")
+    # 2.35.4: show which shot task the cache is being read/written for
+    # (anim vs previs) now that Export Cache isn't anim-only.
+    cmds.text(label=f"Shot: {shot_name} ({cache_task_name.capitalize()})", align="left")
     cmds.text(label=f"Will write {len(export_items)} file(s) to: {cache_dir}", align="left")
     preview_text = "\n".join(filename for _node, _stub, filename, _path in export_items)
     cmds.scrollField(
@@ -10008,7 +10103,7 @@ def show_import_caches_window(*_args):
 
             # Auto-match: "georgeMichael_anim" -> "georgeMichael" -> exact
             # (case-insensitive) match against a published Shade asset name.
-            guess = cache_name[:-5] if cache_name.lower().endswith("_anim") else cache_name
+            guess = _strip_shot_cache_task_suffix(cache_name)
             matched_asset = next((a for a in shade_assets if a.lower() == guess.lower()), None)
             if matched_asset:
                 cmds.optionMenu(asset_dropdown, edit=True, value=matched_asset)
@@ -10087,7 +10182,6 @@ def show_import_caches_window(*_args):
             cmds.warning("No caches to import.")
             return
 
-        cache_dir = get_shot_cache_dir(project_path, shot_name)
         succeeded = []
         skipped_unset = []
         failed = []
@@ -10105,6 +10199,13 @@ def show_import_caches_window(*_args):
             if asset_name == IMPORT_CACHES_NAME_PLACEHOLDER or not cache_filename:
                 skipped_unset.append(row["cache_name"])
                 continue
+
+            # 2.35.4: per-row cache dir -- see ImportCachesPanel._do_import's
+            # matching fix above for why this can no longer be one shared
+            # cache_dir computed once for the whole shot.
+            cache_dir = get_shot_cache_dir(
+                project_path, shot_name, _shot_cache_task_from_cache_name(row["cache_name"])
+            )
 
             cache_file_path = os.path.join(cache_dir, cache_filename)
 
