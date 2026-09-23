@@ -1,0 +1,5 @@
+{
+  "version": "v3.11.0",
+  "folder": "pipeline_3.11.0",
+  "notes": "- Scene thumbnails: Grab/Auto in Save As and File > Save Thumbnail; shown in Open Scene, Save As and Asset Manager\n- Thumbnails are stored inside the scene file, so they travel with it\n- Save As Refresh button; Asset Manager click-to-select\n- Click-to-select on the left of Create Asset Folders / Create Custom Folder\n- Update check: TP_pipe tells you when a new version is on GitHub (click the Version line to check now)"
+}
