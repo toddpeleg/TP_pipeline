@@ -2,6 +2,12 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.11.0
+- added the ability to have thumbnails in the open / save as and asset manager menus
+- added github link to the TP_pipe menu
+- tool auto checks for updates upon launch (pings github) and alerts if theres is an update
+- clicking on the current version manually checks for an update
+
 v 3.8.0
 - updated create shot folders / new UI 
 - followed new UI theme into create asset folders and create custom folders
