@@ -7,6 +7,7 @@ v 3.8.0
 - followed new UI theme into create asset folders and create custom folders
 - revamped asset manager to match new UI
 - adjusted open and save as menu to include the switch style toggle between assets and shots
+- rig publish now includes _rigRoot_set from rig file
 
 v 3.3.2
 - ability to create scene files as separate folders with shots nested below instead of sc01_sh0000
