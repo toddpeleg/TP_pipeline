@@ -2,6 +2,13 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.12.0
+- Shot Range: Start/End in Save As (shots), saved inside the scene file and applied to the timeline + render settings; shown as a Range column in Save As / Open Scene
+- Asset Manager: cache rows show their shot range; the first cache in a clean scene sets the frame range; new Update and Continue button
+- Export Cache: cache version now matches the scene version (asks before overwriting); a second copy of a rig caches under its own name
+- Create Shot Folders: Create / Create and Close / Cancel; Shot Count, Step and Prefix carry over when switching Scene Folders
+- Fix: Rename Project was grayed out when only one project existed
+
 v 3.11.0
 - added the ability to have thumbnails in the open / save as and asset manager menus
 - added github link to the TP_pipe menu
