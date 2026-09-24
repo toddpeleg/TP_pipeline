@@ -1,5 +1,5 @@
 {
-  "version": "v3.11.0",
-  "folder": "pipeline_3.11.0",
-  "notes": "- Scene thumbnails: Grab/Auto in Save As and File > Save Thumbnail; shown in Open Scene, Save As and Asset Manager\n- Thumbnails are stored inside the scene file, so they travel with it\n- Save As Refresh button; Asset Manager click-to-select\n- Click-to-select on the left of Create Asset Folders / Create Custom Folder\n- Update check: TP_pipe tells you when a new version is on GitHub (click the Version line to check now)"
+  "version": "v3.12.0",
+  "folder": "pipeline_3.12.0",
+  "notes": "- Shot Range: Start/End in Save As (shots), saved inside the scene file and applied to the timeline + render settings; shown as a Range column in Save As / Open Scene\n- Asset Manager: cache rows show their shot range; the first cache in a clean scene sets the frame range; new Update and Continue button\n- Export Cache: cache version now matches the scene version (asks before overwriting); a second copy of a rig caches under its own name\n- Create Shot Folders: Create / Create and Close / Cancel; Shot Count, Step and Prefix carry over when switching Scene Folders\n- Fix: Rename Project was grayed out when only one project existed"
 }
