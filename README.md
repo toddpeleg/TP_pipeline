@@ -2,6 +2,10 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.12.6
+- fixes to asset manager implementation.. adding group names to the in scene list for clarity
+- fixed asset manager cache bugs
+  
 v 3.12.4
 - added Set Shot Range tool
   allows adjusting of shot frame range in current scene and saves
