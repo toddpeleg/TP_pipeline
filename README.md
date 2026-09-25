@@ -2,6 +2,14 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.14.0 (pi!)
+- consolidated everything down to one file - pipeline_menu.py
+- added file xfer assist (in the TP_Pipe menu)
+  with the UI of asset manager.. this tool allows you to go through all the files on your project and build a list of files to transfer to another machine.  select all files you want and add them to a list.  choose options for including publishes and dependencies..
+  then build a folder 
+  <project name>/io/file_xfer_assist/<todays date>
+  includes a json file.  then run the tool, point to the dated folder (wherever you choose to save it) and click import
+
 v 3.12.6
 - fixes to asset manager implementation.. adding group names to the in scene list for clarity
 - fixed asset manager cache bugs
