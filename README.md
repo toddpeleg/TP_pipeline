@@ -2,6 +2,13 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.12.4
+- added Set Shot Range tool
+  allows adjusting of shot frame range in current scene and saves
+  adjust current scene frame range without saving
+  update (modify) shot range for current scene
+
+  
 v 3.12.0
 - Shot Range: Start/End in Save As (shots), saved inside the scene file and applied to the timeline + render settings; shown as a Range column in Save As / Open Scene
 - Asset Manager: cache rows show their shot range; the first cache in a clean scene sets the frame range; new Update and Continue button
