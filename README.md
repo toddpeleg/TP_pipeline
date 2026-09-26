@@ -2,6 +2,10 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.15.0
+- a re-org of the tools and their groupings in the menu system (to be less confusing)
+- all project/file sharing, transferring, syncing has been consolidated into one tool in TP_pipe (Project Xfer)
+
 v 3.14.0 (pi!)
 - consolidated everything down to one file - pipeline_menu.py
 - added file xfer assist (in the TP_Pipe menu)
