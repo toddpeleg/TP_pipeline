@@ -1,5 +1,5 @@
 {
-  "version": "v3.14.0",
-  "folder": "pipeline_3.14.0",
-  "notes": "- Install is now a single file: pipeline_menu.py. BIAS.py and userSetup.py are no longer shipped\n- Increment is built in (replaces the BIAS plug-in): bumps only the file name's version, 'Make Latest' picks the true highest version, and the render Version Label is saved with each version. The old BIAS.py is unloaded and removed automatically\n- userSetup.py: TP_pipe now keeps its own marked block in it and leaves your other code alone (old TP_pipe sections are migrated automatically; backup in scripts/tp_pipe_backup)\n- Uninstall hands File > Increment and Save back to Maya and removes only TP_pipe's userSetup.py block"
+  "version": "v3.15.0",
+  "folder": "pipeline_3.15.0",
+  "notes": "- New Project Xfer tool (TP_pipe > Project Utilities) replaces Export Pipeline, Import Pipeline, File Xfer Assist and Project Sync: Send packages assets/shots (folders, settings, latest scenes, optional publishes/dependencies); Receive from a package or another project folder with a compare list (New / Missing tasks / Newer files / Conflict / Up to date). Still reads older packages\n- Menu reorganized: Data Manager is now Create, Asset Manager section is now Asset Tools, Project Settings moved into the Project submenu, new Utility section (Set Shot Range, Save Thumbnail); Set Project Start Frame and the Customize submenu removed\n- Apply Render Settings: frame range comes from the scene's shot range, else the shot's anim scene (and is set on the lighting scene), else the timeline; the camera in _rendercamera becomes the renderable camera (persp if none)\n- Project Sync's background io/manifest.json tracking removed"
 }
