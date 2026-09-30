@@ -2,6 +2,10 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.17.1
+- added playblast function - which is basically mayas playblast function.. but autopupulates the output location to control file structure
+- added "browse" function to file>open and file>save as which gives access to the full hard drive for saving and importing outside the pipeline
+
 v 3.15.0
 - a re-org of the tools and their groupings in the menu system (to be less confusing)
 - all project/file sharing, transferring, syncing has been consolidated into one tool in TP_pipe (Project Xfer)
