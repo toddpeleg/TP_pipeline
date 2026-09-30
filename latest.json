@@ -1,5 +1,5 @@
 {
-  "version": "v3.15.0",
-  "folder": "pipeline_3.15.0",
-  "notes": "- New Project Xfer tool (TP_pipe > Project Utilities) replaces Export Pipeline, Import Pipeline, File Xfer Assist and Project Sync: Send packages assets/shots (folders, settings, latest scenes, optional publishes/dependencies); Receive from a package or another project folder with a compare list (New / Missing tasks / Newer files / Conflict / Up to date). Still reads older packages\n- Menu reorganized: Data Manager is now Create, Asset Manager section is now Asset Tools, Project Settings moved into the Project submenu, new Utility section (Set Shot Range, Save Thumbnail); Set Project Start Frame and the Customize submenu removed\n- Apply Render Settings: frame range comes from the scene's shot range, else the shot's anim scene (and is set on the lighting scene), else the timeline; the camera in _rendercamera becomes the renderable camera (persp if none)\n- Project Sync's background io/manifest.json tracking removed"
+  "version": "v3.17.1",
+  "folder": "pipeline_3.17.1",
+  "notes": "- File > Open and Save As: Assets/Shots switch is back; a new Browse button (left of Open / Overwrite) flips the panel to browse outside the pipeline, and Pipeline flips it back. Outside saves use exactly the name you type (no version numbers, comments or thumbnails)"
 }
