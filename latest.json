@@ -1,5 +1,5 @@
 {
-  "version": "v3.17.1",
-  "folder": "pipeline_3.17.1",
-  "notes": "- File > Open and Save As: Assets/Shots switch is back; a new Browse button (left of Open / Overwrite) flips the panel to browse outside the pipeline, and Pipeline flips it back. Outside saves use exactly the name you type (no version numbers, comments or thumbnails)"
+  "version": "v3.18.1",
+  "folder": "pipeline_3.18.1",
+  "notes": "- Export Selection / Export All now open in the task's output/exports folder (Maya's own export dialog and options, unchanged)\n- Moved scenes relink their references, caches and textures automatically; Utility > Relink References for anything left\n- Texture Connect moved to Utility, and works on single-file installs"
 }
