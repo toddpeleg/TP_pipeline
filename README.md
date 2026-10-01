@@ -2,6 +2,12 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v3.18.1
+- fixed broken texture connect tool (and moved to utlity section)
+- added relink references if they dont attach due to folder structure name change due to different computers or whatever..
+but also added the relinking to happen automatically for references, caches and textures. Button is just for manual use.
+- controlled location for exports function to send to task/output/exports (based on open scene)
+
 v 3.17.1
 - added playblast function - which is basically mayas playblast function.. but autopupulates the output location to control file structure
 - added "browse" function to file>open and file>save as which gives access to the full hard drive for saving and importing outside the pipeline
