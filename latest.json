@@ -1,5 +1,5 @@
 {
-  "version": "v3.18.1",
-  "folder": "pipeline_3.18.1",
-  "notes": "- Export Selection / Export All now open in the task's output/exports folder (Maya's own export dialog and options, unchanged)\n- Moved scenes relink their references, caches and textures automatically; Utility > Relink References for anything left\n- Texture Connect moved to Utility, and works on single-file installs"
+  "version": "v3.20.0",
+  "folder": "pipeline_3.20.0",
+  "notes": "- New Create > Create Tasks: add task folders to existing assets/shots\n- Create Workspaces now adds workspaces only, with an 'Add to' row to pick which existing tasks get them\n- Create Asset Folders / Create Shot Folders: workspaces removed (use Create Workspaces); cleaner layout\n- Open / Save As: Task / Name switch now sits next to Hide checked; Refresh back in the centre\n- Open / Save As: tasks can be hidden per asset/shot, or a whole task for a type\n- Fix: drag-to-reorder no longer makes the dragged row disappear\n- Project > Select Project Folder (was Set Project Parent Folder): pick your project, or any folder inside it, and it becomes current; the projects folder is worked out for you\n- Open / Save As: tick assets or shots and use Hide checked to tidy the list; drag to reorder assets and types (right-click > Reset order)\n- Open: other Maya files in the folder show under an 'Outside pipeline' line; tick files + Hide checked to hide them\n- Texture Connect works on any selection, not just referenced Shade assets, with an Asset picker\n- Utility > Load Textures: UV tile previews on + textured viewports in one click\n- Thumbnails: Grab any rectangle; thumbnails keep their shape and fit the box\n- Personal view settings are saved per user in <project>/project settings/<username>.json"
 }
