@@ -2,6 +2,16 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.22.1
+
+open/save as
+- added support for subtasks
+- added sorting option for subtasks and user in file display
+
+asset manager
+- added support for subtasks
+- added toggle for listing by task or by name
+
 v 3.20.0
 open / save as
 - added checkboxes and "hide checked" so user can turn off things that are unnecessary
