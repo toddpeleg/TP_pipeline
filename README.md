@@ -2,6 +2,37 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.20.0
+open / save as
+- added checkboxes and "hide checked" so user can turn off things that are unnecessary
+- drag and drop reorder to assets (not applied to shots.. shots numerical makes sense.. no need to arrange)
+- toggle for Task/Name - this changes how the assets are viewed... by task with names below.
+or by names with tasks below
+- thumbnail is now freeform
+- added checkbox and hide checked to file list window
+- also allow for viewing non pipelined files (only maya files) in the file view.. with separator for visual ease (this is only for open)
+
+create asset folders
+- added task checkboxes to select which tasks you want added upon creation
+- included custom option - because why not
+
+create shot folders
+- added task checkboxes to select which tasks you want added upon creation
+- included custom option - because why not
+
+create tasks
+- allows user to create task folders 
+- can multiselect in the left window
+
+create workspaces
+- allows user to create workspace folders
+- can multiselect in the left window
+- added a variety of workspaces as options
+- houdini and nuke also create default folders 
+
+Load Textures
+- one click to make textures visible in gui (useful for animation)
+
 v3.18.1
 - fixed broken texture connect tool (and moved to utlity section)
 - added relink references if they dont attach due to folder structure name change due to different computers or whatever..
@@ -23,44 +54,3 @@ v 3.14.0 (pi!)
   then build a folder 
   <project name>/io/file_xfer_assist/<todays date>
   includes a json file.  then run the tool, point to the dated folder (wherever you choose to save it) and click import
-
-v 3.12.6
-- fixes to asset manager implementation.. adding group names to the in scene list for clarity
-- fixed asset manager cache bugs
-  
-v 3.12.4
-- added Set Shot Range tool
-  allows adjusting of shot frame range in current scene and saves
-  adjust current scene frame range without saving
-  update (modify) shot range for current scene
-
-  
-v 3.12.0
-- Shot Range: Start/End in Save As (shots), saved inside the scene file and applied to the timeline + render settings; shown as a Range column in Save As / Open Scene
-- Asset Manager: cache rows show their shot range; the first cache in a clean scene sets the frame range; new Update and Continue button
-- Export Cache: cache version now matches the scene version (asks before overwriting); a second copy of a rig caches under its own name
-- Create Shot Folders: Create / Create and Close / Cancel; Shot Count, Step and Prefix carry over when switching Scene Folders
-- Fix: Rename Project was grayed out when only one project existed
-
-v 3.11.0
-- added the ability to have thumbnails in the open / save as and asset manager menus
-- added github link to the TP_pipe menu
-- tool auto checks for updates upon launch (pings github) and alerts if theres is an update
-- clicking on the current version manually checks for an update
-
-v 3.8.0
-- updated create shot folders / new UI 
-- followed new UI theme into create asset folders and create custom folders
-- revamped asset manager to match new UI
-- adjusted open and save as menu to include the switch style toggle between assets and shots
-- rig publish now includes _rigRoot_set from rig file
-
-v 3.3.2
-- ability to create scene files as separate folders with shots nested below instead of sc01_sh0000
-
-v 3.2.9
-- Multi-user file visibility (removed the current-user filter from Open Scene and Save As, so all correctly-named files from any user show up)
-- Refresh button on Open Scene's browse column, with expand-state and selection preserved across refresh
-
-v 3.2.7 
-— File > Export (Export All / Export Selection, pure mirror of Maya's native menu)
