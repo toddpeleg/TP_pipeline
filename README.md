@@ -2,6 +2,10 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.24.1
+- introduced a walk through to connect to google drive as a drive letter.  this will not work on school machines
+  once working, project xfer now has a button to sync with google drive so anything selected will save locally and on a specified folder in google drive.
+
 v 3.22.1
 
 open/save as
