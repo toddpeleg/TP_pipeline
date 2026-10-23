@@ -2,6 +2,14 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.25.1
+- updated "Create Custom Folder" tool to accommodate multi selection in all cases
+- added User Pref Xfer which can be used to send user level preferences:
+View Settings
+Projects Lists
+Machine Settings 
+- includes ability to send prefs to connected google drive for remote access
+
 v 3.24.1
 - introduced a tool to connect to google drive as a drive letter.  Tool lives in TP_pipe>Tp_pipe.
 This will not work on school machines..  
