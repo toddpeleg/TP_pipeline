@@ -1,5 +1,5 @@
 {
-  "version": "v3.24.0",
-  "folder": "pipeline_3.24.0",
-  "notes": "- Project Xfer: new Send to Google Drive button. Sends as usual (a copy stays in the project's io/xfer folder), then copies the package to your Google Drive folder. Greyed out when Google Drive isn't connected.\n- You pick your Google Drive folder the first time; change it any time from the line under the Send buttons\n- Project Xfer Receive: new Google Drive... button lists the packages in your Google Drive folder, newest first\n- Works whatever drive letter Google Drive is on\n- Also new in 3.23.0: Project Utilities > Connect to Google Drive walks you through setting up Google Drive as G: on your home computer"
+  "version": "v3.24.1",
+  "folder": "pipeline_3.24.1",
+  "notes": "- Connect to Google Drive moved to the TP_pipe section of the TP_pipe menu (under Uninstall)\n- Project Xfer: new Send to Google Drive button. Sends as usual (a copy stays in the project's io/xfer folder), then copies the package to your Google Drive folder. Greyed out when Google Drive isn't connected.\n- You pick your Google Drive folder the first time; change it any time from the line under the Send buttons\n- Project Xfer Receive: new Google Drive... button lists the packages in your Google Drive folder, newest first\n- Works whatever drive letter Google Drive is on\n- Also new in 3.23.0: TP_pipe > Connect to Google Drive walks you through setting up Google Drive as G: on your home computer"
 }
