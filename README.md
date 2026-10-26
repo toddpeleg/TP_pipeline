@@ -2,6 +2,9 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.27.2
+- complete revamp of the project xfer tool to make redundant tasks easier
+
 v 3.25.1
 - updated "Create Custom Folder" tool to accommodate multi selection in all cases
 - added User Pref Xfer which can be used to send user level preferences:
