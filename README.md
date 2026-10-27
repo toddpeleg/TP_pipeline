@@ -2,7 +2,7 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
-v 3.28.0
+v 3.28.0 (courtesy Ben Meyer!)
 - fixed rig publish to automatically import reference, clean and publish
 - allows rigging to occur on referenced models
 
