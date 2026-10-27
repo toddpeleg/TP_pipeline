@@ -2,6 +2,10 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.27.4
+- minor functionality updates to project xfer
+- also revamped project xfer UI to feel less cramped
+
 v 3.27.2
 - complete revamp of the project xfer tool to make redundant tasks easier
 
