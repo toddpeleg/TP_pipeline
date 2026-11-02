@@ -2,6 +2,10 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.29.0
+- added save current file to the create asset folder tool - enables user to create folder and save in one step instead of creating folder
+  and then going to save as
+
 v 3.28.0 (courtesy Ben Meyer!)
 - fixed rig publish to automatically import reference, clean and publish
 - allows rigging to occur on referenced models
