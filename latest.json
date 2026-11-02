@@ -1,5 +1,5 @@
 {
-  "version": "v3.28.0",
-  "folder": "pipeline_3.28.0",
-  "notes": "- Publish (rig): you can now rig against REFERENCED models. Publish imports every loaded reference, removes their namespaces (horse_model:OBJ becomes OBJ) and fixes the ...Deformed shape names (same fix as Clean Rig Asset) before exporting rigRoot to output/rig.\n- Your work file keeps its references: Publish saves it first, does the cleanup only for the export, then reopens the saved work file.\n- Unloaded references are skipped and listed in the Published popup, along with any nodes Maya had to rename because two models used the same name (body -> body1).\n- Clean Rig Asset is still in the menu for doing it by hand."
+  "version": "v3.29.0",
+  "folder": "pipeline_3.29.0",
+  "notes": "- Create Asset Folders: new \"Save current scene into\" checkbox + Task dropdown (Model/Rig/Shade/FX, only ticked tasks). Unticked by default.\n- Ticked: Create builds the folders AND saves the open scene as <asset>_<task>.v001.ma in that task's work/maya/scenes, then closes the panel. One step instead of Create + Save As.\n- Works even if the open scene is another asset's file, so making variations is quick (the old file is left alone).\n- The left tree previews the scene file under the chosen task.\n- Create Shot Folders is unchanged."
 }
