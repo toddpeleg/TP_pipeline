@@ -1,5 +1,5 @@
 {
-  "version": "v3.30.1",
-  "folder": "pipeline_3.30.1",
-  "notes": "- Fixed: on some machines Open (and other panels with an Assets/Shots or Task/Name switch) failed to open with \"Internal C++ object (PySide6.QtWidgets.QProxyStyle) already deleted\"."
+  "version": "v3.31.1",
+  "folder": "pipeline_3.31.1",
+  "notes": "- Project Xfer: the Internal Sync / Outsource switch is gone from the window \u2014 pick the mode from the TP_pipe > Project Xfer rollout; the window header shows which one you're in.\n- Project Xfer: the App column is now Type, showing the file type (ma, mb, abc, nk...), with its header filter.\n- Includes everything in 3.31.0 (Internal Sync / Outsource, dependency types with counts, skip already-sent files, Receive warnings)."
 }
