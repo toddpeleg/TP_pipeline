@@ -1,5 +1,5 @@
 {
-  "version": "v3.29.0",
-  "folder": "pipeline_3.29.0",
-  "notes": "- Create Asset Folders: new \"Save current scene into\" checkbox + Task dropdown (Model/Rig/Shade/FX, only ticked tasks). Unticked by default.\n- Ticked: Create builds the folders AND saves the open scene as <asset>_<task>.v001.ma in that task's work/maya/scenes, then closes the panel. One step instead of Create + Save As.\n- Works even if the open scene is another asset's file, so making variations is quick (the old file is left alone).\n- The left tree previews the scene file under the chosen task.\n- Create Shot Folders is unchanged."
+  "version": "v3.30.0",
+  "folder": "pipeline_3.30.0",
+  "notes": "- Faster Open, Save As and Project Xfer on big projects.\n- Scene user/comment/range are now read once per file and remembered (even after restarting Maya); a file is only re-read when it changes.\n- Folder listings are cached until a folder changes. The Refresh buttons force a full rescan.\n- After Maya starts or you switch projects, TP_pipe indexes the project's scene files in the background (see the Script Editor for \"scene index ready\")."
 }
