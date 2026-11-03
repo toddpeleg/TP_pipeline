@@ -1,5 +1,5 @@
 {
-  "version": "v3.30.0",
-  "folder": "pipeline_3.30.0",
-  "notes": "- Faster Open, Save As and Project Xfer on big projects.\n- Scene user/comment/range are now read once per file and remembered (even after restarting Maya); a file is only re-read when it changes.\n- Folder listings are cached until a folder changes. The Refresh buttons force a full rescan.\n- After Maya starts or you switch projects, TP_pipe indexes the project's scene files in the background (see the Script Editor for \"scene index ready\")."
+  "version": "v3.30.1",
+  "folder": "pipeline_3.30.1",
+  "notes": "- Fixed: on some machines Open (and other panels with an Assets/Shots or Task/Name switch) failed to open with \"Internal C++ object (PySide6.QtWidgets.QProxyStyle) already deleted\"."
 }
