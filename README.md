@@ -2,6 +2,12 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.31.5
+- updated project xfer to have options for internal sync, outsource and receive
+- internal sync: transfering as it was .. all files including work files and options for all dependencies & publishes
+- outsource: this is geared towards helpers who are generally working only with publishes and dont need the work files.. also recognizes when bundles were sent previous so bulk files such as textures dont get sent every time.
+- receive: this is now its own tool which handles receiving packages as either internal sync or outsource.  If only publishes are received it willautomatically duplicate and create a work file with version to match to keep things organized.  
+
 v 3.29.0
 - added save current file to the create asset folder tool - enables user to create folder and save in one step instead of creating folder
   and then going to save as
