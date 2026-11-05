@@ -1,5 +1,5 @@
 {
-  "version": "v3.31.5",
-  "folder": "pipeline_3.31.5",
-  "notes": "- Project Xfer > Receive: the path box is labelled \"Select Package\".\n- Includes 3.31.0-3.31.4 (Internal Sync / Outsource / Receive, dependency types, skip already-sent files, Copy publishes into work, simplified Receive window)."
+  "version": "v3.32.0",
+  "folder": "pipeline_3.32.0",
+  "notes": "- Sends anonymous usage stats (username, Maya/TP_pipe version, project name) so Todd can see how many people use TP_pipe.\n- No other changes from 3.31.5."
 }
