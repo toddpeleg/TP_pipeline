@@ -1,5 +1,5 @@
 {
-  "version": "v3.32.0",
-  "folder": "pipeline_3.32.0",
-  "notes": "- Sends anonymous usage stats (username, Maya/TP_pipe version, project name) so Todd can see how many people use TP_pipe.\n- No other changes from 3.31.5."
+  "version": "v3.32.1",
+  "folder": "pipeline_3.32.1",
+  "notes": "- New asset and shot folders now show up right away in Open, Save As and Project Xfer (no need to hit Refresh).\n- No other changes from 3.32.0."
 }
