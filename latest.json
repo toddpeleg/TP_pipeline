@@ -1,5 +1,5 @@
 {
-  "version": "v3.35.4",
-  "folder": "pipeline_3.35.4",
-  "notes": "- Rename Asset/Shot opens assets and shots right away: the search for scenes that use the files now only runs when you click Check References.\n- No other changes from 3.35.3."
+  "version": "v3.36.0",
+  "folder": "pipeline_3.36.0",
+  "notes": "- Open and Save As now reopen on Assets or Shots, whichever you left them on last time."
 }
