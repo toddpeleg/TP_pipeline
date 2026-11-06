@@ -1,5 +1,5 @@
 {
-  "version": "v3.32.1",
-  "folder": "pipeline_3.32.1",
-  "notes": "- New asset and shot folders now show up right away in Open, Save As and Project Xfer (no need to hit Refresh).\n- No other changes from 3.32.0."
+  "version": "v3.35.4",
+  "folder": "pipeline_3.35.4",
+  "notes": "- Rename Asset/Shot opens assets and shots right away: the search for scenes that use the files now only runs when you click Check References.\n- No other changes from 3.35.3."
 }
