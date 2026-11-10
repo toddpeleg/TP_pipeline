@@ -1,5 +1,5 @@
 {
-  "version": "v3.37.1",
-  "folder": "pipeline_3.37.1",
-  "notes": "- Create Shot Folders: Single Shot now shows just a Shot # box (no Shot Count or Step)."
+  "version": "v3.38.0",
+  "folder": "pipeline_3.38.0",
+  "notes": "- Relink References: new Repath References tab. Tick any references (broken or not) and repath them all at once by new folder, find/replace in path, or one file for all."
 }
