@@ -4,7 +4,7 @@ https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/
 
 v 3.38.0
 - cleaned up the ability to add single shot folders to an existing array of shot folders
-- added ability to repath multiple references
+- added ability to repath multiple references (repath references tab INSIDE relink textures tool)
 
 v 3.36.0
 - added persistent menus, if you close the OPEN tool, it reopens with the same setting between asset/shot
