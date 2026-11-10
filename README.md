@@ -2,6 +2,10 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.38.0
+- cleaned up the ability to add single shot folders to an existing array of shot folders
+- added ability to repath multiple references
+
 v 3.36.0
 - added persistent menus, if you close the OPEN tool, it reopens with the same setting between asset/shot
 - added rename asset/shot tool (under utility) - allows renaming of an asset or shot and all associated files.. references are flagged but still need reconnection if there are any
