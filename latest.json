@@ -1,5 +1,5 @@
 {
-  "version": "v3.36.0",
-  "folder": "pipeline_3.36.0",
-  "notes": "- Open and Save As now reopen on Assets or Shots, whichever you left them on last time."
+  "version": "v3.37.1",
+  "folder": "pipeline_3.37.1",
+  "notes": "- Create Shot Folders: Single Shot now shows just a Shot # box (no Shot Count or Step)."
 }
