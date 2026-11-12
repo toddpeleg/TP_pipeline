@@ -2,6 +2,9 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.39.0
+- added support to project xfer for .ass files and associated textures.
+
 v 3.38.0
 - cleaned up the ability to add single shot folders to an existing array of shot folders
 - added ability to repath multiple references (repath references tab INSIDE relink textures tool)
