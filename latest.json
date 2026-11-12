@@ -1,5 +1,5 @@
 {
-  "version": "v3.38.0",
-  "folder": "pipeline_3.38.0",
-  "notes": "- Relink References: new Repath References tab. Tick any references (broken or not) and repath them all at once by new folder, find/replace in path, or one file for all."
+  "version": "v3.39.0",
+  "folder": "pipeline_3.39.0",
+  "notes": "- Project Xfer: new StandIns (.ass) and StandIn Textures checkboxes. Arnold StandIn files (and every frame of a sequence) and the textures inside them can now be sent."
 }
