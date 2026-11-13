@@ -1,5 +1,5 @@
 {
-  "version": "v3.39.0",
-  "folder": "pipeline_3.39.0",
-  "notes": "- Project Xfer: new StandIns (.ass) and StandIn Textures checkboxes. Arnold StandIn files (and every frame of a sequence) and the textures inside them can now be sent."
+  "version": "v3.40.0",
+  "folder": "pipeline_3.40.0",
+  "notes": "- New \"Prompt for thumbnail with every version save\" checkbox in Save As and the comment popup. When on, Save Thumbnail opens for each new version you save.\n- Export Selection / Export All: the file name box is pre-filled with the scene name and version."
 }
