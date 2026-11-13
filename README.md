@@ -2,6 +2,10 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.40.0 (edgar's version)
+- added a checkbox to "always prompt for thumbnail" on save
+- adjusted export options to include scene name and version automatically 
+
 v 3.39.0
 - added support to project xfer for .ass files and associated textures.
 
