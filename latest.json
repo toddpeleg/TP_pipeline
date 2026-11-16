@@ -1,5 +1,5 @@
 {
-  "version": "v3.41.1",
-  "folder": "pipeline_3.41.1",
-  "notes": "- Open and Save As: right-click an asset/shot in the left list, or a version/file on the right, for Open in Explorer (Project, Asset/Shot and Scene Folder for that item)."
+  "version": "v3.41.2",
+  "folder": "pipeline_3.41.2",
+  "notes": "- Asset Manager: right-click an asset, shot or cache (left list) or anything In Scene for Open in Explorer (Project, Asset/Shot and Scene Folder)."
 }
