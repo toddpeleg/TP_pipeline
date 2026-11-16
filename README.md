@@ -2,6 +2,13 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.41.0 (new request)
+- added a feature in the utlity section, "open in explorer"
+offers 3 options
+1) opens the project root folder
+2) opens the asset or shot root folder of the open scene
+3) opens the folder of the current scene
+
 v 3.40.0 (edgar's version)
 - added a checkbox to "always prompt for thumbnail" on save
 - adjusted export options to include scene name and version automatically 
