@@ -2,6 +2,9 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.41.2
+- added right click submenus to open / save as and asset manager to offer access to windows explorer locations as well
+
 v 3.41.0 (new request)
 - added a feature in the utlity section, "open in explorer"
 offers 3 options
