@@ -1,5 +1,5 @@
 {
-  "version": "v3.40.0",
-  "folder": "pipeline_3.40.0",
-  "notes": "- New \"Prompt for thumbnail with every version save\" checkbox in Save As and the comment popup. When on, Save Thumbnail opens for each new version you save.\n- Export Selection / Export All: the file name box is pre-filled with the scene name and version."
+  "version": "v3.41.0",
+  "folder": "pipeline_3.41.0",
+  "notes": "- New Utility > Open in Explorer: opens the Project Folder, the open scene's Asset/Shot Folder, or its Scene Folder in Windows Explorer. Items gray out when there's nothing to open."
 }
