@@ -1,5 +1,5 @@
 {
-  "version": "v3.43.0",
-  "folder": "pipeline_3.43.0",
-  "notes": "- Asset Manager and Import Caches now list Arnold StandIn (.ass / .ass.gz) files found in a shot's anim/previs cache folders. They load as aiStandIn nodes; versioned names (name.v001.ass) get a version dropdown, #### sequences play with the timeline, and hand-named files show as a single row."
+  "version": "v3.44.0",
+  "folder": "pipeline_3.44.0",
+  "notes": "- Arnold StandIn (.ass) texture paths no longer break when files move between machines or students: exported .ass files get project-relative texture paths, and TP_pipe keeps Arnold's Texture Search Path pointed at the scene's project.\n- Texture Connect now fixes selected StandIns: it reads every .ass (all frames of a sequence, .ass.gz too), finds broken textures in the project's asset texture folders, and rewrites the files (a .bak of each original is kept)."
 }
