@@ -1,5 +1,5 @@
 {
-  "version": "v3.42.0",
-  "folder": "pipeline_3.42.0",
-  "notes": "- New Utility > Copy Shaders: copies the shade geo's shaders onto the rig geo (matched by mesh name, per-face assignments included). Select the shade geo then the rig geo, or select just the rig geo (or nothing, for rigRoot) to pull from the asset's latest lookdev publish."
+  "version": "v3.43.0",
+  "folder": "pipeline_3.43.0",
+  "notes": "- Asset Manager and Import Caches now list Arnold StandIn (.ass / .ass.gz) files found in a shot's anim/previs cache folders. They load as aiStandIn nodes; versioned names (name.v001.ass) get a version dropdown, #### sequences play with the timeline, and hand-named files show as a single row."
 }
