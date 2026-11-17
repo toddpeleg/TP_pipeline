@@ -2,6 +2,9 @@ Installation & Documentation found here
 
 https://docs.google.com/document/d/10WqRuIbrM-SlY68Tq0pRLI35-FTzgNZyc_-Meeit5QY/edit?usp=drive_link
 
+v 3.42.0
+- copy shaders: allows user to copy shaders from a matching asste to another asset (eg.. from shade asset to rig asset)
+
 v 3.41.2
 - added right click submenus to open / save as and asset manager to offer access to windows explorer locations as well
 
