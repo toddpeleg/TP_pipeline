@@ -1,5 +1,5 @@
 {
-  "version": "v3.41.2",
-  "folder": "pipeline_3.41.2",
-  "notes": "- Asset Manager: right-click an asset, shot or cache (left list) or anything In Scene for Open in Explorer (Project, Asset/Shot and Scene Folder)."
+  "version": "v3.42.0",
+  "folder": "pipeline_3.42.0",
+  "notes": "- New Utility > Copy Shaders: copies the shade geo's shaders onto the rig geo (matched by mesh name, per-face assignments included). Select the shade geo then the rig geo, or select just the rig geo (or nothing, for rigRoot) to pull from the asset's latest lookdev publish."
 }
